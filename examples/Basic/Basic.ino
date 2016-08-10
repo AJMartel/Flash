@@ -1,5 +1,5 @@
 /*
-  flash_example.pde - A program to demonstrate the Arduino Flash library
+  Basic.ino - A program to demonstrate the Arduino Flash library
   Copyright (C) 2009 Mikal Hart
   All rights reserved.
 

@@ -1,5 +1,5 @@
 /*
-  flash_streaming.pde - A program to demonstrate the Arduino Flash library
+  Streaming.ino - A program to demonstrate the Arduino Flash library
   Copyright (C) 2009 Mikal Hart
   All rights reserved.
 
