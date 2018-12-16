@@ -113,7 +113,11 @@ private:
 template<class T>
 class _FLASH_ARRAY : public _Printable
 {
+#if ARDUINO >= 150
+  typedef const T PROGMEM _DataType;
+#else
   typedef T PROGMEM _DataType;
+#endif
 
 public:
   _FLASH_ARRAY(const _DataType *arr, size_t count) : _arr(arr), _size(count)
