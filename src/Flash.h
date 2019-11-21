@@ -36,18 +36,18 @@
   _FLASH_STRING name(name##_flash);
 
 // Example: FLASH_ARRAY(float, temperatures, 98.1, 98.5, 99.1, 102.1);
-#define FLASH_ARRAY(type, name, values...) \
-  static const type name##_flash[] PROGMEM = { values }; \
+#define FLASH_ARRAY(type, name, ...)                                           \
+  static const type name##_flash[] PROGMEM = { __VA_ARGS__ };                  \
   _FLASH_ARRAY<type> name(name##_flash, sizeof(name##_flash) / sizeof(type));
 
 // Example: FLASH_TABLE(uint8_t, fonts, 7, {ON, OFF, ON, ON, OFF, ON, OFF}, {OFF, ON, OFF, ON, OFF, ON, OFF});
-#define FLASH_TABLE(type, name, cols, values...) \
-  static const type name##_flash[][cols] PROGMEM = { values }; \
+#define FLASH_TABLE(type, name, cols, ...)                                     \
+  static const type name##_flash[][cols] PROGMEM = { __VA_ARGS__ };            \
   _FLASH_TABLE<type> name((const PROGMEM type *)name##_flash, sizeof(name##_flash) / sizeof(name##_flash[0]), cols);
 
 // Example: FLASH_STRING_ARRAY(nums, PSTR("One"), PSTR("Two"), PSTR("Three"), PSTR("Four"), PSTR("Five"));
-#define FLASH_STRING_ARRAY(name, values...) \
-  const char *name##_arr[] PROGMEM = { values }; \
+#define FLASH_STRING_ARRAY(name, ...)                                          \
+  const char *name##_arr[] PROGMEM = { __VA_ARGS__ };                          \
   _FLASH_STRING_ARRAY name(name##_arr, sizeof(name##_arr) / sizeof(name##_arr[0]));
 
 #ifndef ARDUINO_CORE_PRINTABLE_SUPPORT
@@ -70,13 +70,15 @@ public:
 #if ARDUINO >= 150
   _FLASH_STRING(const char *arr PROGMEM);
 #else
-  _FLASH_STRING(const prog_char *arr);
+  //~ _FLASH_STRING(const prog_char *arr);
+  _FLASH_STRING(const char *arr PROGMEM);
 #endif
 
   size_t length() const 
   { return strlen_P(_arr); }
 
-  char *copy(char *to, size_t size = -1, size_t offset = 0) const 
+  //~ char *copy(char *to, size_t size = -1, size_t offset = 0) const 
+  char *copy(char *to, int size = -1, size_t offset = 0) const 
   { 
 #if ARDUINO >= 150
     return size == (size_t)-1 ?
@@ -89,7 +91,9 @@ public:
 #if ARDUINO >= 150
   const char *access() const PROGMEM { return _arr; }
 #else
-  const prog_char *access() const { return _arr; }
+
+  //~ const prog_char *access() const 
+  const char *access() const PROGMEM { return _arr; }
 #endif
 
   const _Printable &Printable() const
@@ -104,7 +108,8 @@ private:
 #if ARDUINO >= 150
   const char *_arr PROGMEM;
 #else
-  const prog_char *_arr;
+  //~ const prog_char *_arr;
+  const char *_arr PROGMEM;
 #endif
   
 };
@@ -125,6 +130,8 @@ public:
 
   size_t count() const 
   { return _size; }
+  size_t size() const 
+  { return _size; }
 
   const _DataType *access() const 
   { return _arr; }
@@ -138,7 +145,10 @@ public:
       val = pgm_read_word(_arr + index);
     else if (sizeof(T) == 4)
       val = pgm_read_dword(_arr + index);
-    return *reinterpret_cast<T *>(&val);
+    //~ return *reinterpret_cast<T *>(&val);
+    T tmp;  // don't dereference type-punned pointer (potential aliasing issues)
+    memcpy(&tmp, &val, sizeof(T));
+    return tmp;
   }
 
   void print(Print &stream) const
@@ -203,7 +213,8 @@ public:
 #if ARDUINO >= 150
   _FLASH_STRING_ARRAY(const char **arr PROGMEM, size_t count) : _arr(arr), _size(count) {}
 #else
-  _FLASH_STRING_ARRAY(const prog_char **arr, size_t count) : _arr(arr), _size(count) {}
+  //~ _FLASH_STRING_ARRAY(const prog_char **arr, size_t count) : _arr(arr), _size(count)
+  _FLASH_STRING_ARRAY(const char **arr PROGMEM, size_t count) : _arr(arr), _size(count) {}
 #endif
 
   size_t count() const 
@@ -226,7 +237,8 @@ private:
 #if ARDUINO >= 150
   const char **_arr PROGMEM;
 #else
-  const prog_char **_arr;
+  //~ const prog_char **_arr;
+  const char **_arr PROGMEM;
 #endif
   
   size_t _size;
